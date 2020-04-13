@@ -1,3 +1,12 @@
 node_modules
+<<<<<<< HEAD
 build
+=======
+.DS_Store
+dist
+/build
+npm-debug.log*
+yarn-error.log
+cache
+>>>>>>> effb37bfc9f00b7329a35c311da88b01cd78e578
 .env
