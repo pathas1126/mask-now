@@ -2,48 +2,64 @@
 import { Fragment } from 'react'
 import { jsx, css } from '@emotion/core'
 import COLORS from '../../assets/colors'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
+import { useRef } from 'react'
 
 const Footer = ({ color }) => {
-  const [shadow, setShadow] = useState(false)
-  const { documentElement } = document
-
-  const shadowEvent = useCallback(() => {
-    if (documentElement.scrollHeight === documentElement.clientHeight + documentElement.scrollTop) {
-      setShadow(true)
-    } else {
-      setShadow(false)
-    }
-  }, [documentElement.clientHeight, documentElement.scrollHeight, documentElement.scrollTop])
+  const [backAndForth, setbackAndForth] = useState(false)
+  const backAndForthRef = useRef()
 
   useEffect(() => {
-    window.addEventListener('scroll', shadowEvent)
-    return () => window.removeEventListener('scroll', shadowEvent)
-  }, [shadowEvent])
+    const backAndForthCurrent = backAndForthRef.current
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.intersectionRatio > 0.3) {
+          setbackAndForth(true)
+        } else {
+          setbackAndForth(false)
+        }
+      })
+    })
+    if (backAndForthCurrent) {
+      observer.observe(backAndForthCurrent)
+    }
+    return () => observer.unobserve(backAndForthCurrent)
+  }, [])
 
   return (
     <Fragment>
       <footer css={setStyle(color)}>
-        <div></div>
         <p>
           Copyright © <a href="https://github.com/suos3147">YuJin Kim</a>,{' '}
           <a href="https://github.com/pathas1126">JunHong Min</a>,{' '}
           <a href="https://github.com/joabyjoa">EunJin Kim</a> All rights reserved.
         </p>
       </footer>
-      <div css={shadow && boxShadow}></div>
+      <div ref={backAndForthRef} css={backAndForth && boxShadow}></div>
     </Fragment>
   )
 }
 
 const boxShadow = css`
-  width: 100%;
-  height: 3px;
-  bottom: 50px;
   position: absolute;
+  width: 10%;
+  height: 10px;
+  bottom: 0px;
   z-index: 10;
-  box-shadow: 0px -2px 2px 0px rgba(0, 0, 0, 0.32), 0px -3px 4px 1px rgba(30, 144, 255, 0.45);
-  transition: 0.1s ease-out;
+  border-top: 1.3px solid rgba(255, 255, 255, 0.8);
+  animation: backAndForth 1.8s ease-in-out infinite;
+  @keyframes backAndForth {
+    0% {
+      right: 90%;
+    }
+    50% {
+      right: 0;
+      border-color: rgba(255, 255, 255, 0.9);
+    }
+    100% {
+      right: 90%;
+    }
+  }
 `
 
 const setStyle = color => {
@@ -52,11 +68,12 @@ const setStyle = color => {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 53px;
+    height: 100%;
     background: ${COLORS[color]};
     padding: 15px;
     text-align: center;
     color: white;
+
     & a {
       text-decoration: none;
       &:hover {
